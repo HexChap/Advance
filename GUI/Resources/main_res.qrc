@@ -1,0 +1,15 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>../icons/database.png</file>
+    <file>../icons/document.png</file>
+    <file>../icons/image.png</file>
+    <file>../icons/logo.png</file>
+    <file>../icons/logout.png</file>
+    <file>../icons/settings.png</file>
+    <file>../icons/user.png</file>
+    <file>../icons/arrow-left.png</file>
+    <file>../icons/compress_icon.png</file>
+    <file>../icons/scissors_icon.png</file>
+    <file>../icons/logo_icon.png</file>
+</qresource>
+</RCC>
