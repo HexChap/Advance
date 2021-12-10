@@ -1,3 +1,4 @@
+import sys
 import json
 import pathlib
 
@@ -11,22 +12,27 @@ path_to_settings = ROOT_DIR / "settings.json"
 
 
 def get_settings() -> Settings:
-    with open(path_to_settings, "r", encoding="utf-8") as json_file:
-        settings_file = json.loads(json_file.read())
+    try:
+        with open(path_to_settings, "r", encoding="utf-8") as json_file:
+            settings_file = json.loads(json_file.read())
 
-        # input/output pathes
-        path_list = list(settings_file["paths"].values())
+            # input/output pathes
+            path_list = list(settings_file["paths"].values())
 
-        if path_list[0] == "None" or path_list[1] == "None":
-            paths = Paths(ROOT_DIR, ROOT_DIR)
-        else:
-            paths = Paths(*settings_file["paths"].values())
-        # border values for image cutter
-        border = tuple(json.loads(settings_file["border"]))
+            if path_list[0] == "None" or path_list[1] == "None":
+                paths = Paths(ROOT_DIR, ROOT_DIR)
+            else:
+                paths = Paths(*settings_file["paths"].values())
+            # border values for image cutter
+            border = tuple(json.loads(settings_file["border"]))
 
-        settings = Settings(
-            paths=paths,
-            border=border
-        )
+            settings = Settings(
+                paths=paths,
+                border=border
+            )
+    except json.JSONDecodeError as e:
+        print("Скорее всего был упущен двойной обратный слеш (\"\\\\\") в файле \"settings.json\" в категории \"paths\"")
+        sys.exit(0)
 
-    return settings
+    else:
+        return settings
