@@ -1,20 +1,23 @@
 import os
-from pathlib import WindowsPath
 from shutil import copy
 
 from PIL import ImageOps, Image
 
 from .utils.get_images import get_images
 from .utils.config import paths, border, ROOT_DIR
+from .utils.errors import *
 
 
 class _ImgEditor:
-    imgs_data = get_images(paths.input_path)
+    def __init__(self):
+        self.imgs_data = get_images(paths.input_path)
+
+        if self.imgs_data.is_empty():
+            raise NoImages(path=paths.input_path)
 
     def cut_image(self, compress, output_path):
         for path in self.imgs_data.img_paths:
             image = Image.open(path)
-            filename = path.split(os.sep)[-1]
 
             cutted_image = ImageOps.crop(image, border)
             cutted_image.filename = path
@@ -43,14 +46,12 @@ class _ImgEditor:
 
         for path in self.imgs_data.img_paths:
             image = Image.open(path)
-            filename = path.split(os.sep)[-1]
 
             watermark_width = _calc_logo_width(image)
-
             watermark = _resize_with_proportion(watermark, watermark_width)
             paste_mask = _resize_with_proportion(paste_mask, watermark_width)
-
             x, y = _calc_logo_coord(image, watermark, change_from_center)
+
             image.paste(watermark, (x, y), mask=paste_mask)
             image.filename = path
 
@@ -70,7 +71,6 @@ class _ImgEditor:
 
             rename_to = f"{new_name}_{i}.{ext}" if new_name else f"{i}.{ext}"
 
-            src = '.'.join([old_filename, ext]).replace("/", os.sep)
             dst = os.path.join(output_path, rename_to)
 
             copy(path, dst)
@@ -103,14 +103,12 @@ class ImgEditor:
 
 
 def _save_image(img, compress=False, output_path=paths.output_path):
-    print("Saving...")
     filename = _get_filename(img.filename)
-    print(output_path)
+
     if compress:
         img.save(os.path.join(output_path, filename), optimize=True, quality=50)
     else:   
         img.save(os.path.join(output_path, filename))
-        print("saved")
 
 
 def _get_filename(path):
@@ -132,11 +130,10 @@ def _calc_logo_coord(img, watermark, change_coords):
     y = int((img.size[1] / 2) - (watermark.size[1] / 2))
 
     if not change_coords == ("" or () or None):
-        print("calcing with change_coords")
         x += change_coords[0]
         y += change_coords[1]
-    print(x, y)
-    return (x, y)
+
+    return x, y
 
 
 def _resize_with_proportion(img, basewidth):
